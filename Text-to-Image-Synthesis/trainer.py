@@ -56,7 +56,7 @@ class Trainer(object):
         self.optimG = torch.optim.Adam(self.generator.parameters(), lr=self.lr, betas=(self.beta1, 0.999))
 
         self.logger = Logger(vis_screen)
-        self.checkpoints_path = '/home/jeremy/Text-to-Image-Synthesis/checkpoints/'
+        self.checkpoints_path = './checkpoints/'
         self.save_path = save_path
         self.type = type
 
@@ -175,8 +175,8 @@ class Trainer(object):
         l1_loss = nn.L1Loss()
         iteration = 0
 
-        for epoch in range(self.num_epochs):
-            for sample in self.data_loader:
+        for epoch in tqdm(range(self.num_epochs)):
+            for sample in tqdm(self.data_loader):
                 iteration += 1
                 right_images = sample['right_images']
                 right_embed = sample['right_embed']
@@ -251,13 +251,14 @@ class Trainer(object):
                 g_loss.backward()
                 self.optimG.step()
 
-                if iteration % 5 == 0:
-                    self.logger.log_iteration_gan(epoch,d_loss, g_loss, real_score, fake_score)
-                    self.logger.draw(right_images, fake_images)
+                #if iteration % 5 == 0:
+                #    self.logger.log_iteration_gan(epoch,d_loss, g_loss, real_score, fake_score)
+                #    self.logger.draw(right_images, fake_images)
 
-            self.logger.plot_epoch_w_scores(epoch)
+            #self.logger.plot_epoch_w_scores(epoch)
 
-            if (epoch) % 10 == 0:
+            # if (epoch) % 10 == 0:
+            if (epoch) % 2 == 0:
                 Utils.save_checkpoint(self.discriminator, self.generator, self.checkpoints_path, self.save_path, epoch)
 
     def _train_vanilla_wgan(self):
