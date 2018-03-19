@@ -48,6 +48,10 @@ class generator(nn.Module):
 
 	def forward(self, embed_vector, z):
 
+		# embed_vector = 64 by 1024
+		# projected_embed = 64 by 128 by 1 by 1
+		# z = 64 by 100 by 1 by 1
+		
 		projected_embed = self.projection(embed_vector).unsqueeze(2).unsqueeze(3)
 		latent_vector = torch.cat([projected_embed, z], 1)
 		output = self.netG(latent_vector)
