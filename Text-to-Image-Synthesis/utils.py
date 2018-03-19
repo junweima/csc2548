@@ -82,12 +82,16 @@ class Utils(object):
         return gradient_penalty
 
     @staticmethod
-    def save_checkpoint(netD, netG, dir_path, subdir_path, epoch):
+    def save_checkpoint(netD, netG, dir_path, subdir_path, epoch, inverse=False):
         path =  os.path.join(dir_path, subdir_path)
         if not os.path.exists(path):
             os.makedirs(path)
-        torch.save(netD.state_dict(), '{0}/disc_{1}.pth'.format(path, epoch))
-        torch.save(netG.state_dict(), '{0}/gen_{1}.pth'.format(path, epoch))
+        if not inverse:
+            torch.save(netD.state_dict(), '{0}/disc_{1}.pth'.format(path, epoch))
+            torch.save(netG.state_dict(), '{0}/gen_{1}.pth'.format(path, epoch))
+        else:
+            torch.save(netD.state_dict(), '{0}/inv_disc_{1}.pth'.format(path, epoch))
+            torch.save(netG.state_dict(), '{0}/inv_gen_{1}.pth'.format(path, epoch))
 
     @staticmethod
     def weights_init(m):

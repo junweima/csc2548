@@ -432,8 +432,8 @@ class Trainer(object):
 			#self.logger.plot_epoch_w_scores(epoch)
 
 			# if (epoch) % 10 == 0:
-			if (epoch) % 2 == 0:
-				Utils.save_checkpoint(self.inv_discriminator, self.inv_generator, self.checkpoints_path, self.save_path, epoch)
+			if (epoch) % 40 == 0:
+				Utils.save_checkpoint(self.inv_discriminator, self.inv_generator, self.checkpoints_path, self.save_path, epoch, inverse=True)
 
 
 	def _train_vanilla_wgan(self):
