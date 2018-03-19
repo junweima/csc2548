@@ -12,6 +12,8 @@ from PIL import Image
 import os
 from tqdm import tqdm
 
+import pdb
+
 is_cuda = torch.cuda.is_available()
 
 class Trainer(object):
@@ -19,12 +21,24 @@ class Trainer(object):
 		with open('config.yaml', 'r') as f:
 			config = yaml.load(f)
 
+		# forward gan
 		if is_cuda:
 			self.generator = torch.nn.DataParallel(gan_factory.generator_factory(type).cuda())
 			self.discriminator = torch.nn.DataParallel(gan_factory.discriminator_factory(type).cuda())
 		else:
 			self.generator = torch.nn.DataParallel(gan_factory.generator_factory(type))
 			self.discriminator = torch.nn.DataParallel(gan_factory.discriminator_factory(type))
+
+		# inverse gan
+		# TODO: pass these as parameters from runtime in the future
+		inverse_type = 'inverse_gan'
+		if is_cuda:
+			self.inv_generator = torch.nn.DataParallel(gan_factory.generator_factory(inverse_type).cuda())
+			self.inv_discriminator = torch.nn.DataParallel(gan_factory.discriminator_factory(inverse_type).cuda())
+		else:
+			self.inv_generator = torch.nn.DataParallel(gan_factory.generator_factory(inverse_type))
+			self.inv_discriminator = torch.nn.DataParallel(gan_factory.discriminator_factory(inverse_type))
+
 
 		if pre_trained_disc:
 			self.discriminator.load_state_dict(torch.load(pre_trained_disc))
@@ -75,8 +89,9 @@ class Trainer(object):
 		elif self.type == 'vanilla_wgan':
 			self._train_vanilla_wgan()
 		elif self.type == 'vanilla_gan':
-			print("here")
 			self._train_vanilla_gan()
+		elif self.type == 'inverse_gan':
+			self._train_inverse_gan(cls)
 
 	def _train_wgan(self, cls):
 		one = torch.FloatTensor([1])
@@ -199,10 +214,12 @@ class Trainer(object):
 
 		for epoch in tqdm(range(self.num_epochs)):
 			for sample in tqdm(self.data_loader):
+				# pdb.set_trace()
 				iteration += 1
-				right_images = sample['right_images']
-				right_embed = sample['right_embed']
-				wrong_images = sample['wrong_images']
+				# sample.keys() = dict_keys(['right_images', 'wrong_images', 'inter_embed', 'right_embed', 'txt'])
+				right_images = sample['right_images'] # 64x3x64x64
+				right_embed = sample['right_embed'] # 64x1024
+				wrong_images = sample['wrong_images'] # 64x3x64x64
 
 				if is_cuda:
 					right_images = Variable(right_images.float()).cuda()
@@ -299,6 +316,125 @@ class Trainer(object):
 			# if (epoch) % 10 == 0:
 			if (epoch) % 2 == 0:
 				Utils.save_checkpoint(self.discriminator, self.generator, self.checkpoints_path, self.save_path, epoch)
+
+
+	def _train_inverse_gan(self, cls):
+		criterion = nn.BCELoss()
+		l2_loss = nn.MSELoss()
+		l1_loss = nn.L1Loss()
+		iteration = 0
+
+		for epoch in tqdm(range(self.num_epochs)):
+			for sample in tqdm(self.data_loader):
+				# pdb.set_trace()
+				iteration += 1
+				# sample.keys() = dict_keys(['right_images', 'wrong_images', 'inter_embed', 'right_embed', 'txt'])
+				right_images = sample['right_images'] # 64x3x64x64
+				right_embed = sample['right_embed'] # 64x1024
+				wrong_images = sample['wrong_images'] # 64x3x64x64
+
+				if is_cuda:
+					right_images = Variable(right_images.float()).cuda()
+					right_embed = Variable(right_embed.float()).cuda()
+					wrong_images = Variable(wrong_images.float()).cuda()
+				else:
+					right_images = Variable(right_images.float())
+					right_embed = Variable(right_embed.float())
+					wrong_images = Variable(wrong_images.float())
+
+				real_labels = torch.ones(right_images.size(0))
+				fake_labels = torch.zeros(right_images.size(0))
+
+				# ======== One sided label smoothing ==========
+				# Helps preventing the inv_discriminator from overpowering the
+				# inv_generator adding penalty when the inv_discriminator is too confident
+				# =============================================
+				smoothed_real_labels = torch.FloatTensor(Utils.smooth_label(real_labels.numpy(), -0.1))
+
+				if is_cuda:
+					real_labels = Variable(real_labels).cuda()
+					smoothed_real_labels = Variable(smoothed_real_labels).cuda()
+					fake_labels = Variable(fake_labels).cuda()
+				else:
+					real_labels = Variable(real_labels)
+					smoothed_real_labels = Variable(smoothed_real_labels)
+					fake_labels = Variable(fake_labels)
+
+				# Train the inv_discriminator
+				self.inv_discriminator.zero_grad()
+				outputs, activation_real = self.inv_discriminator(right_images, right_embed)
+				real_loss = criterion(outputs, smoothed_real_labels)
+				real_score = outputs
+
+				if cls:
+					outputs, _ = self.inv_discriminator(wrong_images, right_embed)
+					wrong_loss = criterion(outputs, fake_labels)
+					wrong_score = outputs
+
+				if is_cuda:
+					noise = Variable(torch.randn(right_images.size(0), 100)).cuda()
+				else:
+					noise = Variable(torch.randn(right_images.size(0), 100))
+				noise = noise.view(noise.size(0), 100, 1, 1)
+				# fake_images = self.inv_generator(right_embed, noise)
+				# outputs, _ = self.inv_discriminator(fake_images, right_embed)
+				fake_embed = self.inv_generator(right_images)
+				outputs, _ = self.inv_discriminator(right_images, fake_embed)
+				fake_loss = criterion(outputs, fake_labels)
+				fake_score = outputs
+
+				d_loss = real_loss + fake_loss
+
+				if cls:
+					d_loss = d_loss + wrong_loss
+
+
+				d_loss.backward()
+				self.optimD.step()
+
+				# Train the inv_generator
+				self.inv_generator.zero_grad()
+				if is_cuda:
+					noise = Variable(torch.randn(right_images.size(0), 100)).cuda()
+				else:
+					noise = Variable(torch.randn(right_images.size(0), 100))
+
+				noise = noise.view(noise.size(0), 100, 1, 1)
+				# fake_images = self.inv_generator(right_embed, noise)
+				fake_embed = self.inv_generator(right_images)
+				# outputs, activation_fake = self.inv_discriminator(right_images, right_embed)
+				outputs, activation_fake = self.inv_discriminator(right_images, fake_embed)
+				# _, activation_real = self.inv_discriminator(right_images, right_embed)
+
+				# activation_fake = torch.mean(activation_fake, 0)
+				# activation_real = torch.mean(activation_real, 0)
+
+
+				#======= Generator Loss function============
+				# This is a customized loss function, the first term is the regular cross entropy loss
+				# The second term is feature matching loss, this measure the distance between the real and generated
+				# images statistics by comparing intermediate layers activations
+				# The third term is L1 distance between the generated and real images, this is helpful for the conditional case
+				# because it links the embedding feature vector directly to certain pixel values.
+				#===========================================
+				g_loss = criterion(outputs, real_labels) + self.l1_coef * l1_loss(fake_embed, right_embed)
+						# + self.l2_coef * l2_loss(activation_fake, activation_real.detach()) \
+						# + self.l1_coef * l1_loss(fake_images, right_images)
+						
+
+				g_loss.backward()
+				self.optimG.step()
+
+				#if iteration % 5 == 0:
+				#    self.logger.log_iteration_gan(epoch,d_loss, g_loss, real_score, fake_score)
+				#    self.logger.draw(right_images, fake_images)
+
+			#self.logger.plot_epoch_w_scores(epoch)
+
+			# if (epoch) % 10 == 0:
+			if (epoch) % 2 == 0:
+				Utils.save_checkpoint(self.inv_discriminator, self.inv_generator, self.checkpoints_path, self.save_path, epoch)
+
 
 	def _train_vanilla_wgan(self):
 		if is_cuda:

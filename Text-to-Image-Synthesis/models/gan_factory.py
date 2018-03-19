@@ -1,4 +1,4 @@
-from models import gan, gan_cls, wgan_cls, wgan
+from models import gan, gan_cls, wgan_cls, wgan, gan_inverse
 
 class gan_factory(object):
 
@@ -12,6 +12,8 @@ class gan_factory(object):
             return gan.generator()
         elif type == 'vanilla_wgan':
             return wgan.generator()
+        elif type == 'inverse_gan':
+            return gan_inverse.generator_inverse()
 
     @staticmethod
     def discriminator_factory(type):
@@ -23,3 +25,7 @@ class gan_factory(object):
             return gan.discriminator()
         elif type == 'vanilla_wgan':
             return wgan.discriminator()
+        elif type == 'inverse_gan':
+            return gan_inverse.discriminator_inverse()
+
+
