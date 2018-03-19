@@ -32,7 +32,7 @@ class generator_inverse(nn.Module):
 
 			# state size. (ndf*4) x 8 x 8
 			nn.Conv2d(self.ndf * 4, self.ndf * 2, 4, 2, 1, bias=False),
-			nn.BatchNorm2d(self.ndf * 8),
+			nn.BatchNorm2d(self.ndf * 2),
 			nn.LeakyReLU(0.2, inplace=True),
 		)
 
@@ -43,7 +43,7 @@ class generator_inverse(nn.Module):
 		)
 
 	def forward(self, inp):
-		pdb.set_trace()
+		# pdb.set_trace()
 		x_intermediate = self.netG_I(inp)
 		x_intermediate = x_intermediate.view(-1, self.ndf*2*4*4)
 		reconstructed_embed = self.netG_I_projection(x_intermediate)
