@@ -324,8 +324,9 @@ class Trainer(object):
 		l1_loss = nn.L1Loss()
 		iteration = 0
 
-		for epoch in tqdm(range(self.num_epochs)):
-			for sample in tqdm(self.data_loader):
+		for epoch in range(self.num_epochs):
+			print('epoch %d/200'%(epoch))
+			for sample in self.data_loader:
 				# pdb.set_trace()
 				iteration += 1
 				# sample.keys() = dict_keys(['right_images', 'wrong_images', 'inter_embed', 'right_embed', 'txt'])
