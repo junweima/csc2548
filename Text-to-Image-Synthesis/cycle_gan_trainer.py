@@ -178,7 +178,7 @@ class CycleTrainer(object):
                 d_loss_A = real_loss + fake_loss
 
                 if cls:
-                    d_loss_A = d_loss + wrong_loss
+                    d_loss_A = d_loss_A + wrong_loss
 
                 disc_A_losses.append(d_loss_A.data[0])
 
@@ -212,7 +212,7 @@ class CycleTrainer(object):
                 d_loss_B = real_loss + fake_loss
 
                 if cls:
-                    d_loss_B = d_loss + wrong_loss
+                    d_loss_B = d_loss_B + wrong_loss
 
                 disc_B_losses.append(d_loss_B.data[0])
 
@@ -257,10 +257,10 @@ class CycleTrainer(object):
                 # getting forward and backward cycle losses
 
                 rec_A = self.generator_B(fake_images)
-                loss_cycle_A = self.l1_loss(rec_A, right_embed) * lambda_A
+                loss_cycle_A = l1_loss(rec_A, right_embed) * lambda_A
 
-                rec_B = self.generator_A(fake_embed)
-                loss_cycle_B = self.l1_loss(rec_B, right_images) * lambda_B
+                rec_B = self.generator_A(fake_embed, noise)
+                loss_cycle_B = l1_loss(rec_B, right_images) * lambda_B
                 
                 loss_G = loss_G_A + loss_G_B + loss_cycle_A + loss_cycle_B
 
