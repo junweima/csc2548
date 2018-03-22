@@ -16,6 +16,8 @@ matplotlib.use('Agg')
 
 import matplotlib.pyplot as plt
 import pdb
+import pickle
+
 
 is_cuda = torch.cuda.is_available()
 
@@ -282,6 +284,15 @@ class CycleTrainer(object):
                 Utils.save_checkpoint(self.discriminator_A, self.generator_A, self.checkpoints_path, self.save_path, epoch)
                 Utils.save_checkpoint(self.discriminator_B, self.generator_B, self.checkpoints_path, self.save_path, epoch, inverse=True)
 
+        with open('gen_A_loss.pkl', 'wb') as gen_a_f, open('disc_A_loss.pkl', 'wb') as disc_a_f, open('gen_B_loss.pkl', 'wb') as gen_b_f, open('disc_B_loss.pkl', 'wb') as disc_b_f, open('cycle_a_loss.pkl', 'wb') as cycle_a_f, open('cycle_b_loss.pkl', 'wb') as cycle_b_f:
+            pickle.dump(gen_A_losses, gen_a_f)
+            pickle.dump(disc_A_losses, disc_a_f)
+            pickle.dump(gen_B_losses, gen_b_f)
+            pickle.dump(disc_B_losses, disc_b_f)
+            pickle.dump(cycle_A_losses, cycle_a_f)
+            pickle.dump(cycle_B_losses, cycle_b_f)
+
+
         x = list(range(len(gen_A_losses)))
         plt.plot(x, gen_A_losses, 'g-', label='gen A loss')
         plt.plot(x, disc_A_losses, 'b-', label='disc A loss')
@@ -290,7 +301,7 @@ class CycleTrainer(object):
         plt.clf()
 
         plt.plot(x, gen_B_losses, 'g-', label='gen B loss')
-        plt.plot(x, disc_B_losses, 'b-', label='gen B loss')
+        plt.plot(x, disc_B_losses, 'b-', label='disc B loss')
         plt.legend()
         plt.savefig('gen_B_vs_disc_B.png')
         plt.clf()
