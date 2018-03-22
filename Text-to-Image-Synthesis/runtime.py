@@ -69,5 +69,6 @@ elif not args.inference and args.type=='cycle_gan':
     print('------------')
     cycle_trainer.train(args.cls)
 else:
-    trainer.predict()
+    # trainer.predict()
+    cycle_trainer.predict()
 

@@ -300,9 +300,7 @@ class Trainer(object):
 				# The third term is L1 distance between the generated and real images, this is helpful for the conditional case
 				# because it links the embedding feature vector directly to certain pixel values.
 				#===========================================
-				g_loss = criterion(outputs, real_labels) \
-						 + self.l2_coef * l2_loss(activation_fake, activation_real.detach()) \
-						 + self.l1_coef * l1_loss(fake_images, right_images)
+				g_loss = criterion(outputs, real_labels) 
 
 				g_loss.backward()
 				self.optimG.step()

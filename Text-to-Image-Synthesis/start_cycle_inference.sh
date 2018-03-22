@@ -1,1 +1,1 @@
-python3 runtime.py --pre_trained_disc_A=./checkpoints/disc_A_200.pth --pre_trained_gen_A=./checkpoints/gen_A_200.pth --pre_trained_disc_B=./checkpoints/disc_B_200.pth --pretrained_gen_B=./checkpoints/gen_A_200.pth --type=cycle_gan --inference --split=2
+python3 runtime.py --pre_trained_disc_A=./checkpoints/disc_150.pth --pre_trained_gen_A=./checkpoints/gen_150.pth --pre_trained_disc_B=./checkpoints/inv_disc_150.pth --pre_trained_gen_B=./checkpoints/inv_gen_150.pth --type=cycle_gan --inference --split=2
