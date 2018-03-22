@@ -278,7 +278,7 @@ class CycleTrainer(object):
                 self.optim_G_B.step()
 
             # if (epoch) % 10 == 0:
-            if (epoch) % 50 == 0:
+            if (epoch+1) % 50 == 0:
                 Utils.save_checkpoint(self.discriminator_A, self.generator_A, self.checkpoints_path, self.save_path, epoch)
                 Utils.save_checkpoint(self.discriminator_B, self.generator_B, self.checkpoints_path, self.save_path, epoch, inverse=True)
 
@@ -287,19 +287,23 @@ class CycleTrainer(object):
         plt.plot(x, disc_A_losses, 'b-', label='disc A loss')
         plt.legend()
         plt.savefig('gen_A_vs_disc_A.png')
+        plt.clf()
 
         plt.plot(x, gen_B_losses, 'g-', label='gen B loss')
         plt.plot(x, disc_B_losses, 'b-', label='gen B loss')
         plt.legend()
         plt.savefig('gen_B_vs_disc_B.png')
+        plt.clf()
 
         plt.plot(x, cycle_A_losses, 'g-', label = 'cycle A loss')
         plt.legend()
         plt.savefig('cycle_A_loss.png')
+        plt.clf()
 
         plt.plot(x, cycle_B_losses, 'b-', label = 'cycle B loss')
         plt.legend()
         plt.savefig('cycle_B_loss.png')
+        plt.clf()
 
 
     def predict(self):
