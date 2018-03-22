@@ -11,8 +11,10 @@ from utils import Utils, Logger
 from PIL import Image
 import os
 from tqdm import tqdm
-import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use('Agg')
 
+import matplotlib.pyplot as plt
 import pdb
 
 is_cuda = torch.cuda.is_available()
@@ -79,22 +81,22 @@ class CycleTrainer(object):
     def load_pretrained_weights(self, pre_trained_gen_A, pre_trained_disc_A, pre_trained_gen_B = False, pre_trained_disc_B = False):
         """ load pre trained weights for G_A, G_B, D_A, D_B """
         if pre_trained_disc_A:
-            self.discriminator_A.load_state_dict(torch.load(pre_trained_disc))
+            self.discriminator_A.load_state_dict(torch.load(pre_trained_disc_A))
         else:
             self.discriminator_A.apply(Utils.weights_init)
 
         if pre_trained_gen_A:
-            self.generator_A.load_state_dict(torch.load(pre_trained_gen))
+            self.generator_A.load_state_dict(torch.load(pre_trained_gen_A))
         else:
             self.generator_A.apply(Utils.weights_init)
 
         if pre_trained_disc_B:
-            self.discriminator_B.load_state_dict(torch.load(pre_trained_disc))
+            self.discriminator_B.load_state_dict(torch.load(pre_trained_disc_B))
         else:
             self.discriminator_B.apply(Utils.weights_init)
 
         if pre_trained_gen_B:
-            self.generator_B.load_state_dict(torch.load(pre_trained_gen))
+            self.generator_B.load_state_dict(torch.load(pre_trained_gen_B))
         else:
             self.generator_B.apply(Utils.weights_init)
 
@@ -330,6 +332,8 @@ class CycleTrainer(object):
                 im = Image.fromarray(image.data.mul_(127.5).add_(127.5).byte().permute(1, 2, 0).cpu().numpy())
                 im.save('results/{0}/{1}.jpg'.format(self.save_path, t.replace("/", "")[:100]))
                 print(t)
+
+        print('done prediction')
 
 
 
