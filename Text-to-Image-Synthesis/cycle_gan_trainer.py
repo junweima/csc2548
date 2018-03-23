@@ -111,8 +111,8 @@ class CycleTrainer(object):
         criterion = nn.BCELoss()
         l2_loss = nn.MSELoss()
         l1_loss = nn.L1Loss()
-        lambda_A = 10.0
-        lambda_B = 10.0
+        lambda_A = 2
+        lambda_B = 2
         iteration = 0
         gen_A_losses = []
         gen_B_losses = []
