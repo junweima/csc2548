@@ -1,1 +1,1 @@
-python3 runtime.py --cls --type=gan --epochs=200
+python3 runtime.py --cls --type=gan --epochs=300

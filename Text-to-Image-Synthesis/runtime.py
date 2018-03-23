@@ -25,48 +25,50 @@ parser.add_argument('--num_workers', default=8, type=int)
 parser.add_argument('--epochs', default=55, type=int)
 args = parser.parse_args()
 
-# trainer = Trainer(type=args.type,
-#                   dataset=args.dataset,
-#                   split=args.split,
-#                   lr=args.lr,
-#                   diter=args.diter,
-#                   vis_screen=args.vis_screen,
-#                   save_path=args.save_path,
-#                   l1_coef=args.l1_coef,
-#                   l2_coef=args.l2_coef,
-#                   pre_trained_disc=args.pre_trained_disc_A,
-#                   pre_trained_gen=args.pre_trained_gen_A,
-#                   batch_size=args.batch_size,
-#                   num_workers=args.num_workers,
-#                   epochs=args.epochs
-#                   )
+if args.type != 'cycle_gan':
 
-cycle_trainer = CycleTrainer(type=args.type,
-                  dataset=args.dataset,
-                  split=args.split,
-                  lr=args.lr,
-                  diter=args.diter,
-                  vis_screen=args.vis_screen,
-                  save_path=args.save_path,
-                  l1_coef=args.l1_coef,
-                  l2_coef=args.l2_coef,
-                  pre_trained_disc_A=args.pre_trained_disc_A,
-                  pre_trained_gen_A=args.pre_trained_gen_A,
-                  batch_size=args.batch_size,
-                  num_workers=args.num_workers,
-                  epochs=args.epochs,
-                  pre_trained_disc_B=args.pre_trained_disc_B,
-                  pre_trained_gen_B=args.pre_trained_gen_B
-                  )
+    trainer = Trainer(type=args.type,
+                      dataset=args.dataset,
+                      split=args.split,
+                      lr=args.lr,
+                      diter=args.diter,
+                      vis_screen=args.vis_screen,
+                      save_path=args.save_path,
+                      l1_coef=args.l1_coef,
+                      l2_coef=args.l2_coef,
+                      pre_trained_disc=args.pre_trained_disc_A,
+                      pre_trained_gen=args.pre_trained_gen_A,
+                      batch_size=args.batch_size,
+                      num_workers=args.num_workers,
+                      epochs=args.epochs
+                      )
+else:
+    cycle_trainer = CycleTrainer(type=args.type,
+                      dataset=args.dataset,
+                      split=args.split,
+                      lr=args.lr,
+                      diter=args.diter,
+                      vis_screen=args.vis_screen,
+                      save_path=args.save_path,
+                      l1_coef=args.l1_coef,
+                      l2_coef=args.l2_coef,
+                      pre_trained_disc_A=args.pre_trained_disc_A,
+                      pre_trained_gen_A=args.pre_trained_gen_A,
+                      batch_size=args.batch_size,
+                      num_workers=args.num_workers,
+                      epochs=args.epochs,
+                      pre_trained_disc_B=args.pre_trained_disc_B,
+                      pre_trained_gen_B=args.pre_trained_gen_B
+                      )
 
 print(args.inference)
 print(args.type)
 
 if not args.inference and args.type!='cycle_gan':
-    print("asldfhlasdjfal;sefjal;sdf")
+    print("gan")
     trainer.train(args.cls)
 elif not args.inference and args.type=='cycle_gan':
-    print('------------')
+    print('cycle gan')
     cycle_trainer.train(args.cls)
 else:
     # trainer.predict()
