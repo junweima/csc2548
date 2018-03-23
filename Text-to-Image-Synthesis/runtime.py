@@ -11,6 +11,7 @@ parser.add_argument("--l1_coef", default=50, type=float)
 parser.add_argument("--l2_coef", default=100, type=float)
 parser.add_argument("--diter", default=5, type=int)
 parser.add_argument("--cls", default=False, action='store_true')
+parser.add_argument("--interp", default=False, action='store_true')
 parser.add_argument("--vis_screen", default='gan')
 parser.add_argument("--save_path", default='')
 parser.add_argument("--inference", default=False, action='store_true')
@@ -66,7 +67,7 @@ print(args.type)
 
 if not args.inference and args.type!='cycle_gan':
     print("gan")
-    trainer.train(args.cls)
+    trainer.train(args.cls, args.interp)
 elif not args.inference and args.type=='cycle_gan':
     print('cycle gan')
     cycle_trainer.train(args.cls)

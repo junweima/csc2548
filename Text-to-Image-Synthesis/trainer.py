@@ -85,12 +85,12 @@ class Trainer(object):
         self.save_path = save_path
         self.type = type
 
-    def train(self, cls=False):
+    def train(self, cls=False, interp=False):
 
         if self.type == 'wgan':
             self._train_wgan(cls)
         elif self.type == 'gan':
-            self._train_gan(cls)
+            self._train_gan(cls, interp)
         elif self.type == 'vanilla_wgan':
             self._train_vanilla_wgan()
         elif self.type == 'vanilla_gan':
@@ -315,13 +315,25 @@ class Trainer(object):
 
                 if (interp):
                     """ GAN INT loss"""
-                    first_part = right_embed[:self.batch_size/2,:]
-                    second_part = right_embed[self.batch_size/2:,:]
+                    # pdb.set_trace()
+                    first_part = right_embed[:int(self.batch_size/2),:]
+                    second_part = right_embed[int(self.batch_size/2):,:]
                     interp_embed = (first_part + second_part)*0.5
-                    noise = Variable(torch.randn(interp_embed.size(0), 100)).cuda()
-                    fake_images = self.generator(right_embed, noise)
+                    
+                    if is_cuda:
+                        noise = Variable(torch.randn(interp_embed.size(0), 100)).cuda()
+                    else:
+                        noise = Variable(torch.randn(interp_embed.size(0), 100))
+
+                    interp_real_labels = torch.ones(interp_embed.size(0))
+                    if is_cuda:
+                        interp_real_labels = Variable(interp_real_labels).cuda()
+                    else:
+                        interp_real_labels = Variable(interp_real_labels)
+
+                    fake_images = self.generator(interp_embed, noise)
                     outputs, activation_fake = self.discriminator(fake_images, interp_embed)
-                    g_int_loss = criterion(outputs, real_labels)
+                    g_int_loss = criterion(outputs, interp_real_labels)
                     g_loss = g_loss + g_int_loss
 
                 g_loss.backward()
