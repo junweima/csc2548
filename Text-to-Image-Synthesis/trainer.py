@@ -211,7 +211,7 @@ class Trainer(object):
             if (epoch+1) % 50 == 0:
                 Utils.save_checkpoint(self.discriminator, self.generator, self.checkpoints_path, epoch)
 
-    def _train_gan(self, cls):
+    def _train_gan(self, cls, interp):
         criterion = nn.BCELoss()
         l2_loss = nn.MSELoss()
         l1_loss = nn.L1Loss()
@@ -300,6 +300,7 @@ class Trainer(object):
                 activation_real = torch.mean(activation_real, 0)
 
 
+
                 #======= Generator Loss function============
                 # This is a customized loss function, the first term is the regular cross entropy loss
                 # The second term is feature matching loss, this measure the distance between the real and generated
@@ -311,6 +312,17 @@ class Trainer(object):
                 # \
                 # + self.l2_coef * l2_loss(activation_fake, activation_real.detach()) \
                 # + self.l1_coef * l1_loss(fake_images, right_images)
+
+                if (interp):
+                    """ GAN INT loss"""
+                    first_part = right_embed[:self.batch_size/2,:]
+                    second_part = right_embed[self.batch_size/2:,:]
+                    interp_embed = (first_part + second_part)*0.5
+                    noise = Variable(torch.randn(interp_embed.size(0), 100)).cuda()
+                    fake_images = self.generator(right_embed, noise)
+                    outputs, activation_fake = self.discriminator(fake_images, interp_embed)
+                    g_int_loss = criterion(outputs, real_labels)
+                    g_loss = g_loss + g_int_loss
 
                 g_loss.backward()
                 self.optimG.step()
