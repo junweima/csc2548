@@ -27,10 +27,16 @@ class generator(nn.Module):
 			nn.ConvTranspose2d(self.latent_dim, self.ngf * 8, 4, 1, 0, bias=False),
 			nn.BatchNorm2d(self.ngf * 8),
 			nn.ReLU(True),
+
+			# adding extra convs will give output (ngf*8) x 4 x 4
+
 			# state size. (ngf*8) x 4 x 4
 			nn.ConvTranspose2d(self.ngf * 8, self.ngf * 4, 4, 2, 1, bias=False),
 			nn.BatchNorm2d(self.ngf * 4),
 			nn.ReLU(True),
+
+			# adding extra convs will give output (ngf*4) x 4 x 4
+
 			# state size. (ngf*4) x 8 x 8
 			nn.ConvTranspose2d(self.ngf * 4, self.ngf * 2, 4, 2, 1, bias=False),
 			nn.BatchNorm2d(self.ngf * 2),
