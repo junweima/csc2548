@@ -24,7 +24,7 @@ class generator(nn.Module):
 
         # based on: https://github.com/pytorch/examples/blob/master/dcgan/main.py
         self.netG = nn.Sequential(
-            nn.ConvTranspose2d(self.latent_dim, self.ngf * 8, 4, 1, 0, bias=False),
+            nn.ConvTranspose2d(self.latent_dim, self.ngf * 8, 4, 1, 0, bias=True),
             nn.BatchNorm2d(self.ngf * 8),
             nn.ReLU(True),
 
