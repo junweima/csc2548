@@ -276,10 +276,10 @@ class Trainer(object):
                 fake_loss = criterion(outputs, fake_labels)
                 fake_score = outputs
 
-                d_loss = real_loss + fake_loss
-
                 if cls:
-                    d_loss = d_loss + wrong_loss
+                    d_loss = real_loss + 0.5 * wrong_loss + 0.5 * fake_loss
+                else:
+                    d_loss = real_loss + fake_loss
 
                 d_loss.backward()
                 self.optimD.step()
@@ -316,16 +316,18 @@ class Trainer(object):
                 if (interp):
                     """ GAN INT loss"""
                     # pdb.set_trace()
-                    first_part = right_embed[:int(self.batch_size/2),:]
-                    second_part = right_embed[int(self.batch_size/2):,:]
+                    # print('iter {}, size {}, right {}'.format(iteration, self.batch_size, right_embed.size()))i
+                    available_batch_size = int(right_embed.size(0))
+                    first_part = right_embed[:int(available_batch_size/2),:]
+                    second_part = right_embed[int(available_batch_size/2):,:]
                     interp_embed = (first_part + second_part)*0.5
                     
                     if is_cuda:
-                        noise = Variable(torch.randn(interp_embed.size(0), 100)).cuda()
+                        noise = Variable(torch.randn(int(available_batch_size/2), 100)).cuda()
                     else:
-                        noise = Variable(torch.randn(interp_embed.size(0), 100))
+                        noise = Variable(torch.randn(int(available_batch_size), 100))
 
-                    interp_real_labels = torch.ones(interp_embed.size(0))
+                    interp_real_labels = torch.ones(int(available_batch_size/2))
                     if is_cuda:
                         interp_real_labels = Variable(interp_real_labels).cuda()
                     else:
