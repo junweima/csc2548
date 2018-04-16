@@ -11,7 +11,7 @@ class generator(nn.Module):
         self.image_size = 64
         self.num_channels = 3
         self.noise_dim = 100
-        self.embed_dim = 1024
+        self.embed_dim = 2400 # compatible with skip thought (1024)
         self.projected_embed_dim = 128
         self.latent_dim = self.noise_dim + self.projected_embed_dim
         self.ngf = 64
@@ -92,7 +92,7 @@ class discriminator(nn.Module):
         super(discriminator, self).__init__()
         self.image_size = 64
         self.num_channels = 3
-        self.embed_dim = 1024
+        self.embed_dim = 2400 # compatible with skip thought (1024)
         self.projected_embed_dim = 128
         self.ndf = 64
         self.B_dim = 128

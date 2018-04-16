@@ -71,7 +71,13 @@ if not args.inference and args.type!='cycle_gan':
 elif not args.inference and args.type=='cycle_gan':
     print('cycle gan')
     cycle_trainer.train(args.cls)
-else:
+elif args.inference and args.type=='cycle_gan':
     # trainer.predict()
+    print('cycle gan prediction')
     cycle_trainer.predict()
+elif args.inference and args.type=='gan':
+    print('gan prediction')
+    trainer.predict()
+else:
+    print('wrong input...')
 

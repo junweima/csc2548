@@ -336,7 +336,7 @@ class Trainer(object):
                     fake_images = self.generator(interp_embed, noise)
                     outputs, activation_fake = self.discriminator(fake_images, interp_embed)
                     g_int_loss = criterion(outputs, interp_real_labels)
-                    g_loss = g_loss + g_int_loss
+                    g_loss = g_loss + 0.2 * g_int_loss
 
                 g_loss.backward()
                 self.optimG.step()
