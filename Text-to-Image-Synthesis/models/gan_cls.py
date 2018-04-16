@@ -11,7 +11,7 @@ class generator(nn.Module):
         self.image_size = 64
         self.num_channels = 3
         self.noise_dim = 100
-        self.embed_dim = 1024
+        self.embed_dim = 2400 # compatible with skip thought (1024)
         self.projected_embed_dim = 128
         self.latent_dim = self.noise_dim + self.projected_embed_dim
         self.ngf = 64
@@ -24,7 +24,7 @@ class generator(nn.Module):
 
         # based on: https://github.com/pytorch/examples/blob/master/dcgan/main.py
         self.netG = nn.Sequential(
-            nn.ConvTranspose2d(self.latent_dim, self.ngf * 8, 4, 1, 0, bias=False),
+            nn.ConvTranspose2d(self.latent_dim, self.ngf * 8, 4, 1, 0, bias=True),
             nn.BatchNorm2d(self.ngf * 8),
             nn.ReLU(True),
 
@@ -38,7 +38,7 @@ class generator(nn.Module):
             nn.ReLU(True),
 
             nn.Conv2d(self.ngf*2, self.ngf*8, 3, 1, 1),
-            nn.BatchNorm2d(ngf*8),
+            nn.BatchNorm2d(self.ngf*8),
             nn.ReLU(True),
 
             # state size. (ngf*8) x 4 x 4
@@ -56,7 +56,7 @@ class generator(nn.Module):
             nn.ReLU(True),
 
             nn.Conv2d(self.ngf, self.ngf*4, 3, 1, 1),
-            nn.BatchNorm2d(ngf*4),
+            nn.BatchNorm2d(self.ngf*4),
             nn.ReLU(True),
 
 
@@ -92,7 +92,7 @@ class discriminator(nn.Module):
         super(discriminator, self).__init__()
         self.image_size = 64
         self.num_channels = 3
-        self.embed_dim = 1024
+        self.embed_dim = 2400 # compatible with skip thought (1024)
         self.projected_embed_dim = 128
         self.ndf = 64
         self.B_dim = 128

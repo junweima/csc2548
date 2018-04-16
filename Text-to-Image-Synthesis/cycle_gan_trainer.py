@@ -182,7 +182,7 @@ class CycleTrainer(object):
                 d_loss_A = real_loss + fake_loss
 
                 if cls:
-                    d_loss_A = d_loss_A + wrong_loss
+                    d_loss_A = real_loss + 0.5 * wrong_loss + 0.5 * fake_loss
 
                 disc_A_losses.append(d_loss_A.data[0])
 
@@ -216,7 +216,7 @@ class CycleTrainer(object):
                 d_loss_B = real_loss + fake_loss
 
                 if cls:
-                    d_loss_B = d_loss_B + wrong_loss
+                    d_loss_B = real_loss + 0.5 * wrong_loss + 0.5 * fake_loss
 
                 disc_B_losses.append(d_loss_B.data[0])
 

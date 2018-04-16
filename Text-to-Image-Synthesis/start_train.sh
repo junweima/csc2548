@@ -1,1 +1,1 @@
-python3 runtime.py --cls --interp --type=gan --epochs=300
+python3 runtime.py --interp --type=gan --cls --epochs=202 --dataset=birds
