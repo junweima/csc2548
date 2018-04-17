@@ -4,3 +4,4 @@ dataset/*
 .idea/
 checkpoints/*
 results/*
+config.yaml

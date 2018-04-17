@@ -38,7 +38,7 @@ class generator(nn.Module):
             nn.ReLU(True),
 
             nn.Conv2d(self.ngf*2, self.ngf*8, 3, 1, 1),
-            nn.BatchNorm2d(ngf*8),
+            nn.BatchNorm2d(self.ngf*8),
             nn.ReLU(True),
 
             # state size. (ngf*8) x 4 x 4
@@ -56,7 +56,7 @@ class generator(nn.Module):
             nn.ReLU(True),
 
             nn.Conv2d(self.ngf, self.ngf*4, 3, 1, 1),
-            nn.BatchNorm2d(ngf*4),
+            nn.BatchNorm2d(self.ngf*4),
             nn.ReLU(True),
 
 
