@@ -589,10 +589,9 @@ class Trainer(object):
             plt.clf()"""
 
             # if (epoch) % 10 == 0:
-            # if (epoch) % 50 == 0:
-            Utils.save_checkpoint(self.discriminator, self.generator, self.checkpoints_path, self.save_path, epoch)
-            Utils.save_checkpoint(self.discriminator2, self.generator2, self.checkpoints_path, self.save_path, epoch, False, 2)
-            break
+            if (epoch) % 50 == 0:
+                Utils.save_checkpoint(self.discriminator, self.generator, self.checkpoints_path, self.save_path, epoch)
+                Utils.save_checkpoint(self.discriminator2, self.generator2, self.checkpoints_path, self.save_path, epoch, False, 2)
 
     def _train_inverse_gan(self, cls):
         criterion = nn.BCELoss()
