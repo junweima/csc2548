@@ -41,7 +41,9 @@ if args.type != 'cycle_gan':
                       pre_trained_gen=args.pre_trained_gen_A,
                       batch_size=args.batch_size,
                       num_workers=args.num_workers,
-                      epochs=args.epochs
+                      epochs=args.epochs,
+                      pre_trained_disc_B=args.pre_trained_disc_B,
+                      pre_trained_gen_B=args.pre_trained_gen_B
                       )
 else:
     cycle_trainer = CycleTrainer(type=args.type,
@@ -78,6 +80,8 @@ elif args.inference and args.type=='cycle_gan':
 elif args.inference and args.type=='gan':
     print('gan prediction')
     trainer.predict()
+elif args.inference and args.type=='stackgan':
+    trainer.predict(args.type)
 else:
     print('wrong input...')
 

@@ -1,0 +1,1 @@
+python3 runtime.py --pre_trained_disc_A=./checkpoints/disc1_99.pth --pre_trained_gen_A=./checkpoints/gen1_99.pth --pre_trained_disc_B=./checkpoints/disc2_99.pth --pre_trained_gen_B=./checkpoints/gen2_99.pth --type=stackgan --inference --split=2 --dataset=birds

@@ -43,11 +43,20 @@ class Text2ImageDataset(Dataset):
         wrong_image = bytes(np.array(self.find_wrong_image(example['class'])))
         inter_embed = np.array(self.find_inter_embed())
 
-        right_image = Image.open(io.BytesIO(right_image)).resize((64, 64))
-        wrong_image = Image.open(io.BytesIO(wrong_image)).resize((64, 64))
+        byte_right_image = io.BytesIO(right_image)
+        byte_wrong_image = io.BytesIO(wrong_image)
+
+        right_image = Image.open(byte_right_image).resize((64, 64))
+        wrong_image = Image.open(byte_wrong_image).resize((64, 64))
+
+        right_image128 = Image.open(byte_right_image).resize((128, 128))
+        wrong_image128 = Image.open(byte_wrong_image).resize((128, 128))
 
         right_image = self.validate_image(right_image)
         wrong_image = self.validate_image(wrong_image)
+
+        right_image128 = self.validate_image128(right_image128)
+        wrong_image128 = self.validate_image128(wrong_image128)
 
         txt = np.array(example['txt']).astype(str)
 
@@ -56,8 +65,10 @@ class Text2ImageDataset(Dataset):
                 'right_embed': torch.FloatTensor(right_embed),
                 'wrong_images': torch.FloatTensor(wrong_image),
                 'inter_embed': torch.FloatTensor(inter_embed),
-                'txt': str(txt)
-                 }
+                'txt': str(txt),
+                'right_images128': torch.FloatTensor(right_image128),
+                'wrong_images128': torch.FloatTensor(wrong_image128)
+                }
 
         sample['right_images'] = sample['right_images'].sub_(127.5).div_(127.5)
         sample['wrong_images'] =sample['wrong_images'].sub_(127.5).div_(127.5)
@@ -93,3 +104,13 @@ class Text2ImageDataset(Dataset):
 
         return img.transpose(2, 0, 1)
 
+    def validate_image128(self, img):
+        img = np.array(img, dtype=float)
+        if len(img.shape) < 3:
+            rgb = np.empty((128, 128, 3), dtype=np.float32)
+            rgb[:, :, 0] = img
+            rgb[:, :, 1] = img
+            rgb[:, :, 2] = img
+            img = rgb
+
+        return img.transpose(2, 0, 1)
