@@ -14,6 +14,8 @@ class gan_factory(object):
             return wgan.generator()
         elif type == 'inverse_gan':
             return gan_inverse.generator_inverse()
+        elif type == 'stage2_gan':
+            return gan_cls.generator2()
 
     @staticmethod
     def discriminator_factory(type):
@@ -27,5 +29,7 @@ class gan_factory(object):
             return wgan.discriminator()
         elif type == 'inverse_gan':
             return gan_inverse.discriminator_inverse()
+        elif type == 'stage2_gan':
+            return gan_cls.discriminator2()
 
 

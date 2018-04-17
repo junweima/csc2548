@@ -80,7 +80,7 @@ class generator(nn.Module):
         # embed_vector = 64 by 1024
         # projected_embed = 64 by 128 by 1 by 1
         # z = 64 by 100 by 1 by 1
-        
+
         projected_embed = self.projection(embed_vector).unsqueeze(2).unsqueeze(3)
         latent_vector = torch.cat([projected_embed, z], 1)
         output = self.netG(latent_vector)
@@ -101,6 +101,175 @@ class discriminator(nn.Module):
         self.netD_1 = nn.Sequential(
             # input is (nc) x 64 x 64
             nn.Conv2d(self.num_channels, self.ndf, 4, 2, 1, bias=True),
+            nn.LeakyReLU(0.2, inplace=True),
+            # state size. (ndf) x 32 x 32
+            nn.Conv2d(self.ndf, self.ndf * 2, 4, 2, 1, bias=True),
+            nn.BatchNorm2d(self.ndf * 2),
+            nn.LeakyReLU(0.2, inplace=True),
+            # state size. (ndf*2) x 16 x 16
+            nn.Conv2d(self.ndf * 2, self.ndf * 4, 4, 2, 1, bias=True),
+            nn.BatchNorm2d(self.ndf * 4),
+            nn.LeakyReLU(0.2, inplace=True),
+            # state size. (ndf*4) x 8 x 8
+            nn.Conv2d(self.ndf * 4, self.ndf * 8, 4, 2, 1, bias=True),
+            nn.BatchNorm2d(self.ndf * 8),
+            nn.LeakyReLU(0.2, inplace=True),
+
+            nn.Conv2d(self.ndf*8, self.ndf*2, 1, 1, 0),
+            nn.BatchNorm2d(self.ndf*2),
+            nn.LeakyReLU(0.2, True),
+
+            nn.Conv2d(self.ndf*2, self.ndf*2, 3, 1, 1),
+            nn.BatchNorm2d(self.ndf*2),
+            nn.LeakyReLU(0.2, True),
+
+            nn.Conv2d(self.ndf*2, self.ndf*8, 3, 1, 1),
+            nn.BatchNorm2d(self.ndf*8),
+            nn.LeakyReLU(0.2, True)
+
+            #output size (ndf*8) x 8 x 8
+        )
+
+        self.projector = Concat_embed(self.embed_dim, self.projected_embed_dim)
+
+        self.netD_2 = nn.Sequential(
+            # state size. (ndf*8) x 4 x 4
+            nn.Conv2d(self.ndf * 8 + self.projected_embed_dim, self.ndf*8, 1),
+            nn.BatchNorm2d(self.ndf*8),
+            nn.LeakyReLU(0.2, True),
+
+            nn.Conv2d(self.ndf * 8, 1, 4, 1, 0, bias=True),
+            nn.Sigmoid()
+        )
+
+    def forward(self, inp, embed):
+        x_intermediate = self.netD_1(inp)
+        x = self.projector(x_intermediate, embed)
+        x = self.netD_2(x)
+
+        return x.view(-1, 1).squeeze(1) , x_intermediate
+
+
+class generator2(nn.Module):
+    def __init__(self):
+        super(generator2, self).__init__()
+        self.image_size = 128
+        self.num_channels = 3
+        self.noise_dim = 100
+        self.embed_dim = 2400 # compatible with skip thought (1024)
+        self.projected_embed_dim = 128
+        self.latent_dim = self.noise_dim + self.projected_embed_dim
+        self.ngf = 64
+
+        self.projection = nn.Sequential(
+            nn.Linear(in_features=self.embed_dim, out_features=self.projected_embed_dim),
+            nn.BatchNorm1d(num_features=self.projected_embed_dim),
+            nn.LeakyReLU(negative_slope=0.2, inplace=True)
+        )
+
+
+        # downsample
+        self.netG_1 = nn.Sequential(
+            # input is (nc) x 64 x 64
+            nn.Conv2d(self.num_channels, self.ngf, 4, 2, 1, bias=True),
+            nn.LeakyReLU(0.2, inplace=True),
+            # state size. (ngf) x 32 x 32
+            nn.Conv2d(self.ngf, self.ngf * 2, 4, 2, 1, bias=True),
+            nn.BatchNorm2d(self.ngf * 2),
+            nn.LeakyReLU(0.2, inplace=True),
+            # state size. (ngf*2) x 16 x 16
+
+            nn.Conv2d(self.ngf*2, self.ngf*4, 3, 1, 1),
+            nn.BatchNorm2d(self.ngf * 4),
+            nn.LeakyReLU(0.2, inplace=True),
+
+            nn.Conv2d(self.ngf*4, self.ngf*8, 3, 1, 1),
+            nn.BatchNorm2d(self.ngf * 8),
+            nn.LeakyReLU(0.2, inplace=True),
+
+            #output size (ndf*8) x 16 x 16
+        )
+
+        # project to 128x128
+        self.netG_2 = nn.Sequential(
+            # input size: (projected_embed_dim + ngf*8) x 16 x 16
+            nn.Conv2d(self.projected_embed_dim + self.ngf*8 , self.ngf * 8, 1, 1, 0),
+            nn.BatchNorm2d(self.ngf * 8),
+            nn.ReLU(True),
+
+            # state size: ngf*8 x 16 x 16
+            nn.Conv2d(self.ngf*8, self.ngf*2, 3, 1, 1),
+            nn.BatchNorm2d(self.ngf*2),
+            nn.ReLU(True),
+
+            # state size: ngf*2 x 16 x 16
+            nn.Conv2d(self.ngf*2, self.ngf*2, 3, 1, 1),
+            nn.BatchNorm2d(self.ngf*2),
+            nn.ReLU(True),
+
+            # state size: ngf*2 x 16 x 16
+            nn.Conv2d(self.ngf*2, self.ngf*8, 3, 1, 1),
+            nn.BatchNorm2d(self.ngf*8),
+            nn.ReLU(True),
+
+            # state size. (ngf*8) x 16 x 16
+            nn.ConvTranspose2d(self.ngf * 8, self.ngf * 4, 4, 2, 1),
+            nn.BatchNorm2d(self.ngf * 4),
+            nn.ReLU(True),
+
+            # adding extra convs will give output (ngf*4) x 32 x 32
+            nn.Conv2d(self.ngf*4, self.ngf * 2, 1, 1, 0),
+            nn.BatchNorm2d(self.ngf * 2),
+            nn.ReLU(True),
+
+            nn.Conv2d(self.ngf * 2, self.ngf * 2, 3, 1, 1),
+            nn.BatchNorm2d(self.ngf * 2),
+            nn.ReLU(True),
+
+            # state size. (ngf*2) x 32 x 32
+            nn.ConvTranspose2d(self.ngf * 2, self.ngf , 4, 2, 1, bias=True),
+            nn.BatchNorm2d(self.ngf),
+            nn.ReLU(True),
+            # state size. (ngf*2) x 64 x 64
+            nn.ConvTranspose2d(self.ngf,self.num_channels, 4, 2, 1, bias=True),
+            nn.Tanh()
+             # state size. (num_channels) x 128 x 128
+            )
+
+
+    def forward(self, inp, embed):
+
+        # embed_vector = 64 by 1024
+        # projected_embed = 64 by 128 by 1 by 1
+        # z = 64 by 100 by 1 by 1
+        g1_output = self.netG_1(inp) # shape is (ndf*8) x 16 x 16
+
+        projected_embed = self.projection(embed)
+        replicated_embed = projected_embed.repeat(16, 16, 1, 1).permute(2, 3, 0, 1)
+        hidden_concat = torch.cat([g1_output, replicated_embed], 1)
+        output = self.netG_2(hidden_concat)
+
+        return output
+
+class discriminator2(nn.Module):
+    def __init__(self):
+        super(discriminator2, self).__init__()
+        self.image_size = 64
+        self.num_channels = 3
+        self.embed_dim = 2400 # compatible with skip thought (1024)
+        self.projected_embed_dim = 128
+        self.ndf = 64
+        self.B_dim = 128
+        self.C_dim = 16
+
+        self.netD_1 = nn.Sequential(
+
+            # input is (nc) x 128 x 128
+            nn.Conv2d(self.num_channels, self.ndf, 4, 2, 1, bias=True),
+            nn.LeakyReLU(0.2, inplace=True),
+            # input is (ndf) x 64 x 64
+            nn.Conv2d(self.ndf, self.ndf, 4, 2, 1, bias=True),
+            nn.BatchNorm2d(self.ndf),
             nn.LeakyReLU(0.2, inplace=True),
             # state size. (ndf) x 32 x 32
             nn.Conv2d(self.ndf, self.ndf * 2, 4, 2, 1, bias=True),
