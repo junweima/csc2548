@@ -467,37 +467,6 @@ class Trainer(object):
 
                 d_loss.backward()
                 self.optimD.step()
-                
-
-                # -------------------- Training D stage 2 -------------------------------
-                outputs, activation_real = self.discriminator2(right_images128, right_embed)
-                real_loss = criterion(outputs, smoothed_real_labels)
-                real_score = outputs
-
-                if cls:
-                    outputs, _ = self.discriminator2(wrong_images128, right_embed)
-                    wrong_loss = criterion(outputs, fake_labels)
-                    wrong_score = outputs
-
-                if is_cuda:
-                    noise = Variable(torch.randn(right_images.size(0), 100)).cuda()
-                else:
-                    noise = Variable(torch.randn(right_images.size(0), 100))
-
-                noise = noise.view(noise.size(0), 100, 1, 1)
-                fake_images_v1 = self.generator(right_embed, noise)
-                fake_images = self.generator2(fake_images_v1, right_embed)
-                outputs, _ = self.discriminator2(fake_images, right_embed)
-                fake_loss = criterion(outputs, fake_labels)
-                fake_score = outputs
-
-                if cls:
-                    d_loss2 = real_loss + 0.5 * wrong_loss + 0.5 * fake_loss
-                else:
-                    d_loss2 = real_loss + fake_loss
-
-                d_loss2.backward()
-                self.optimD2.step()
 
                 # -------------------- Training G stage 1 -------------------------------
                 self.generator.zero_grad()
@@ -509,24 +478,8 @@ class Trainer(object):
                 noise = noise.view(noise.size(0), 100, 1, 1)
                 fake_images = self.generator(right_embed, noise)
                 outputs, activation_fake = self.discriminator(fake_images, right_embed)
-                _, activation_real = self.discriminator(right_images, right_embed)
 
-                activation_fake = torch.mean(activation_fake, 0)
-                activation_real = torch.mean(activation_real, 0)
-
-
-
-                #======= Generator Loss function============
-                # This is a customized loss function, the first term is the regular cross entropy loss
-                # The second term is feature matching loss, this measure the distance between the real and generated
-                # images statistics by comparing intermediate layers activations
-                # The third term is L1 distance between the generated and real images, this is helpful for the conditional case
-                # because it links the embedding feature vector directly to certain pixel values.
-                #===========================================
                 g_loss = criterion(outputs, real_labels)
-                # \
-                # + self.l2_coef * l2_loss(activation_fake, activation_real.detach()) \
-                # + self.l1_coef * l1_loss(fake_images, right_images)
 
                 if (interp):
                     """ GAN INT loss"""
@@ -556,6 +509,37 @@ class Trainer(object):
                 g_loss.backward()
                 self.optimG.step()
 
+                # -------------------- Training D stage 2 -------------------------------
+                outputs, activation_real = self.discriminator2(right_images128, right_embed)
+                real_loss = criterion(outputs, smoothed_real_labels)
+                real_score = outputs
+
+                if cls:
+                    outputs, _ = self.discriminator2(wrong_images128, right_embed)
+                    wrong_loss = criterion(outputs, fake_labels)
+                    wrong_score = outputs
+
+                if is_cuda:
+                    noise = Variable(torch.randn(right_images.size(0), 100)).cuda()
+                else:
+                    noise = Variable(torch.randn(right_images.size(0), 100))
+
+                noise = noise.view(noise.size(0), 100, 1, 1)
+                fake_images_v1 = self.generator(right_embed, noise)
+                fake_images_v1 = fake_images_v1.detach()
+                fake_images = self.generator2(fake_images_v1, right_embed)
+                outputs, _ = self.discriminator2(fake_images, right_embed)
+                fake_loss = criterion(outputs, fake_labels)
+                fake_score = outputs
+
+                if cls:
+                    d_loss2 = real_loss + 0.5 * wrong_loss + 0.5 * fake_loss
+                else:
+                    d_loss2 = real_loss + fake_loss
+
+                d_loss2.backward()
+                self.optimD2.step()
+
 
                 # -------------------- Training G stage 2 -------------------------------
                 self.generator2.zero_grad()
@@ -566,6 +550,7 @@ class Trainer(object):
 
                 noise = noise.view(noise.size(0), 100, 1, 1)
                 fake_images_v1 = self.generator(right_embed, noise)
+                fake_images_v1 = fake_images_v1.detach()
                 fake_images = self.generator2(fake_images_v1, right_embed)
                 outputs, _ = self.discriminator2(fake_images, right_embed)
 
@@ -589,7 +574,7 @@ class Trainer(object):
             plt.clf()"""
 
             # if (epoch) % 10 == 0:
-            if (epoch) % 50 == 0:
+            if (epoch) % 20 == 0:
                 Utils.save_checkpoint(self.discriminator, self.generator, self.checkpoints_path, self.save_path, epoch)
                 Utils.save_checkpoint(self.discriminator2, self.generator2, self.checkpoints_path, self.save_path, epoch, False, 2)
 
