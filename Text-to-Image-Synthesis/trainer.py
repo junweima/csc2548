@@ -60,12 +60,12 @@ class Trainer(object):
             self.generator.apply(Utils.weights_init)
 
         if pre_trained_disc_B:
-            self.discriminator2.load_state_dict(torch.load(pre_trained_disc_2))
+            self.discriminator2.load_state_dict(torch.load(pre_trained_disc_B))
         else:
             self.discriminator2.apply(Utils.weights_init)
 
         if pre_trained_gen_B:
-            self.generator2.load_state_dict(torch.load(pre_trained_gen_2))
+            self.generator2.load_state_dict(torch.load(pre_trained_gen_B))
         else:
             self.generator2.apply(Utils.weights_init)
 
