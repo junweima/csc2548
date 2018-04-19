@@ -73,6 +73,9 @@ class Text2ImageDataset(Dataset):
         sample['right_images'] = sample['right_images'].sub_(127.5).div_(127.5)
         sample['wrong_images'] =sample['wrong_images'].sub_(127.5).div_(127.5)
 
+        sample['right_images128'] = sample['right_images128'].sub_(127.5).div_(127.5)
+        sample['wrong_images128'] =sample['wrong_images128'].sub_(127.5).div_(127.5)
+
         return sample
 
     def find_wrong_image(self, category):
