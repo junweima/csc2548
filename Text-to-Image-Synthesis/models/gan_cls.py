@@ -292,18 +292,30 @@ class discriminator2(nn.Module):
             nn.Conv2d(self.ndf * 4, self.ndf * 8, 4, 2, 1, bias=True),
             nn.BatchNorm2d(self.ndf * 8),
             nn.LeakyReLU(0.2, inplace=True),  # 16 * 16 * ndf * 8
-            nn.Conv2d(self.ndf * 8, self.ndf * 16, 4, 2, 1, bias=True),
-            nn.BatchNorm2d(self.ndf * 16),
-            nn.LeakyReLU(0.2, inplace=True),  # 8 * 8 * ndf * 16
-            nn.Conv2d(self.ndf * 16, self.ndf * 32, 4, 2, 1, bias=True),
-            nn.BatchNorm2d(self.ndf * 32),
-            nn.LeakyReLU(0.2, inplace=True),  # 4 * 4 * ndf * 32
-            conv3x3(self.ndf * 32, self.ndf * 16),
-            nn.BatchNorm2d(self.ndf * 16),
-            nn.LeakyReLU(0.2, inplace=True),   # 4 * 4 * ndf * 16
-            nn.Conv2d(self.ndf * 16, self.ndf * 8, 3, 1, 1, bias=True),
+            nn.Conv2d(self.ndf * 8, self.ndf * 8, 3, 1, 1),
             nn.BatchNorm2d(self.ndf * 8),
-            nn.LeakyReLU(0.2, inplace=True)   # 4 * 4 * ndf * 8
+            nn.LeakyReLU(0.2, inplace=True),  # 8 * 8 * ndf * 8
+            nn.Conv2d(self.ndf * 8, self.ndf * 2, 4, 2, 1),
+            nn.BatchNorm2d(self.ndf * 2),
+            nn.LeakyReLU(0.2, inplace=True), # 4 * 4 * ndf * 2
+            nn.Conv2d(self.ndf * 2, self.ndf * 8, 3, 1, 1),
+            nn.BatchNorm2d(self.ndf * 8),
+            nn.LeakyReLU(0.2, inplace=True)
+            nn.Conv2d(self.ndf * 8, self.ndf * 8, 4, 2, 1),
+            nn.BatchNorm2d(self.ndf * 8),
+            nn.LeakyReLU(0.2, inplace=True)
+            # nn.Conv2d(self.ndf * 8, self.ndf * 16, 4, 2, 1, bias=True),
+            # nn.BatchNorm2d(self.ndf * 16),
+            # nn.LeakyReLU(0.2, inplace=True),  # 8 * 8 * ndf * 16
+            # nn.Conv2d(self.ndf * 16, self.ndf * 32, 4, 2, 1, bias=True),
+            # nn.BatchNorm2d(self.ndf * 32),
+            # nn.LeakyReLU(0.2, inplace=True),  # 4 * 4 * ndf * 32
+            # conv3x3(self.ndf * 32, self.ndf * 16),
+            # nn.BatchNorm2d(self.ndf * 16),
+            # nn.LeakyReLU(0.2, inplace=True),   # 4 * 4 * ndf * 16
+            # nn.Conv2d(self.ndf * 16, self.ndf * 8, 3, 1, 1, bias=True),
+            # nn.BatchNorm2d(self.ndf * 8),
+            # nn.LeakyReLU(0.2, inplace=True)   # 4 * 4 * ndf * 8
         )
 
         self.outlogitscond = nn.Sequential(
