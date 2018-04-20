@@ -50,8 +50,8 @@ class Text2ImageDataset(Dataset):
             self.dataset = h5py.File(self.datasetFile, mode='r')
             self.dataset_keys = [str(k) for k in self.dataset[self.split].keys()]
 
-        # example_name = self.dataset_keys[idx]
-        example_name = self.dataset_keys[0]
+        example_name = self.dataset_keys[idx]
+        # example_name = self.dataset_keys[0]
         example = self.dataset[self.split][example_name]
         index_found = self.image_paths_df.index[self.image_paths_df[2]==(example_name[:-2]+'.jpg')].values[0]
         if index_found == None:
