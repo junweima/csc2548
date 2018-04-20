@@ -6,3 +6,4 @@ checkpoints/*
 results/*
 config.yaml
 *.pkl
+bounding_boxes.txt
