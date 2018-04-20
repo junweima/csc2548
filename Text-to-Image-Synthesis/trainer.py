@@ -510,7 +510,7 @@ class Trainer(object):
                 self.optimG.step()
 
                 # -------------------- Training D stage 2 -------------------------------
-                outputs, activation_real = self.discriminator2(right_images128, right_embed)
+                outputs = self.discriminator2(right_images128, right_embed)
                 real_loss = criterion(outputs, smoothed_real_labels)
                 real_score = outputs
 
