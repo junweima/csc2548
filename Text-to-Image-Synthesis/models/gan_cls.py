@@ -8,7 +8,7 @@ import pdb
 def conv3x3(in_planes, out_planes, stride=1):
     "3x3 convolution with padding"
     return nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride,
-                     padding=1, bias=False)
+                     padding=1, bias=True)
 
 
 # Upsale the spatial size by a factor of 2
@@ -208,11 +208,11 @@ class generator2(nn.Module):
             nn.Conv2d(self.num_channels, self.ngf, 3, 1, 1),
             nn.ReLU(True),
             # state size. (ngf) x 64 x 64
-            nn.Conv2d(self.ngf, self.ngf * 2, 4, 2, 1, bias=False),
+            nn.Conv2d(self.ngf, self.ngf * 2, 4, 2, 1, bias=True),
             nn.BatchNorm2d(self.ngf * 2),
             nn.ReLU(True),
             # state size. (ngf*2) x 32 x 32
-            nn.Conv2d(self.ngf * 2, self.ngf * 4, 4, 2, 1, bias=False),
+            nn.Conv2d(self.ngf * 2, self.ngf * 4, 4, 2, 1, bias=True),
             nn.BatchNorm2d(self.ngf * 4),
             nn.ReLU(True)
             # state size. (ngf*4) x 16 x 16
