@@ -574,7 +574,7 @@ class Trainer(object):
             plt.clf()"""
 
             # if (epoch) % 10 == 0:
-            if (epoch) % 20 == 0:
+            if (epoch+1) % 5 == 0:
                 Utils.save_checkpoint(self.discriminator, self.generator, self.checkpoints_path, self.save_path, epoch)
                 Utils.save_checkpoint(self.discriminator2, self.generator2, self.checkpoints_path, self.save_path, epoch, False, 2)
 
