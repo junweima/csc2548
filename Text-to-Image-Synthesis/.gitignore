@@ -5,3 +5,4 @@ dataset/*
 checkpoints/*
 results/*
 config.yaml
+*.pkl
