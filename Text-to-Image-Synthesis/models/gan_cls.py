@@ -326,10 +326,10 @@ class discriminator2(nn.Module):
             nn.Sigmoid()
         )
 
-        self.outlogits = nn.Sequential(
-            nn.Conv2d(self.ndf * 8, 1, kernel_size=4, stride=4),
-            nn.Sigmoid()
-        )
+        # self.outlogits = nn.Sequential(
+        #     nn.Conv2d(self.ndf * 8, 1, kernel_size=4, stride=4),
+        #     nn.Sigmoid()
+        # )
 
 
         self.projector = Concat_embed(self.embed_dim, self.projected_embed_dim)
@@ -338,6 +338,6 @@ class discriminator2(nn.Module):
         x_intermediate = self.encode_img(inp)
         x = self.projector(x_intermediate, embed)
         x_cond = self.outlogitscond(x)
-        x_uncond = self.outlogits(x_intermediate)
+        # x_uncond = self.outlogits(x_intermediate)
 
         return x_cond.view(-1, 1).squeeze(1) , x_intermediate
