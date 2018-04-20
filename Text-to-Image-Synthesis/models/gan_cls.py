@@ -300,7 +300,7 @@ class discriminator2(nn.Module):
             nn.LeakyReLU(0.2, inplace=True), # 4 * 4 * ndf * 2
             nn.Conv2d(self.ndf * 2, self.ndf * 8, 3, 1, 1),
             nn.BatchNorm2d(self.ndf * 8),
-            nn.LeakyReLU(0.2, inplace=True)
+            nn.LeakyReLU(0.2, inplace=True),
             nn.Conv2d(self.ndf * 8, self.ndf * 8, 4, 2, 1),
             nn.BatchNorm2d(self.ndf * 8),
             nn.LeakyReLU(0.2, inplace=True)
