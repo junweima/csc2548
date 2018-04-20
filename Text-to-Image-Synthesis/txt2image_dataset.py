@@ -66,13 +66,13 @@ class Text2ImageDataset(Dataset):
         
         right_image = bytes(np.array(example['img']))
         right_embed = np.array(example['embeddings'], dtype=float)
-        wrong_name, wrong_example = self.find_wrong_image(exmaple['class']) 
+        wrong_name, wrong_example = self.find_wrong_image(example['class']) 
         # wrong_image = bytes(np.array(self.find_wrong_image(example['class'])))
-        wrong_image = bytes(np.array(wrong_example)))
+        wrong_image = bytes(np.array(wrong_example))
         inter_embed = np.array(self.find_inter_embed())
 
         # find wrong image bbox
-        index_found_wrong = self.image_paths_df.index[self.image_paths_df[2]==(wrong_name[:-2]+'.jpg')].values[0]]
+        index_found_wrong = self.image_paths_df.index[self.image_paths_df[2]==(wrong_name[:-2]+'.jpg')].values[0]
         if index_found_wrong == None:
             print('ERROR: cannot find wrong image')
 
@@ -88,19 +88,21 @@ class Text2ImageDataset(Dataset):
         right_image = Image.open(byte_right_image)
         wrong_image = Image.open(byte_wrong_image)
         
-        right_image = crop_image(right_image, bbox=[bbox_x, bbox_y, bbox_w, bboxh]) 
-        wrong_image = crop_image(wrong_image, bbox=[wrong_bbox_x, wrong_bbox_y, wrong_bbox_w, wrong_bboxh]) 
+        right_image = self.crop_image(right_image, bbox=[bbox_x, bbox_y, bbox_w, bbox_h]) 
+        wrong_image = self.crop_image(wrong_image, bbox=[wrong_bbox_x, wrong_bbox_y, wrong_bbox_w, wrong_bbox_h]) 
 
         # right_image = Image.open(byte_right_image).resize((64, 64))
         # wrong_image = Image.open(byte_wrong_image).resize((64, 64))
         #right_image128 = Image.open(byte_right_image).resize((128, 128))
         #wrong_image128 = Image.open(byte_wrong_image).resize((128, 128))
 
-        right_image = transforms.Scale(64)(right_image)
-        wrong_image = transforms.Scale(64)(wrong_image)
+        right_image = transforms.Resize((64,64))(right_image)
+        wrong_image = transforms.Resize((64,64))(wrong_image)
         
-        right_image128 = transforms.Scale(128)(right_image)
-        wrong_image128 = transforms.Scale(128)(wrong_image) 
+        right_image128 = transforms.Resize((128,128))(right_image)
+        wrong_image128 = transforms.Resize((128,128))(wrong_image) 
+
+        # print(right_image.size, wrong_image.size, right_image128.size, wrong_image128.size)
 
         right_image = self.validate_image(right_image)
         wrong_image = self.validate_image(wrong_image)
