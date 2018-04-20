@@ -340,4 +340,4 @@ class discriminator2(nn.Module):
         x_cond = self.outlogitscond(x)
         # x_uncond = self.outlogits(x_intermediate)
 
-        return x_cond.view(-1, 1).squeeze(1) , x_intermediate
+        return x_cond.view(-1, 1).squeeze(1)
