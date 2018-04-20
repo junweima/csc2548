@@ -21,7 +21,7 @@ class Text2ImageDataset(Dataset):
         self.dataset_keys = None
         self.split = 'train' if split == 0 else 'valid' if split == 1 else 'test'
         self.bboxes_df = pd.read_table('bounding_boxes.txt', sep=' ', header=None)
-        self.image_paths_df = pd.read_table('images.txt', sep='\s+|\/+', header=None)	
+        self.image_paths_df = pd.read_table('images.txt', sep='\s+|\/+', header=None)   
         self.h5py2int = lambda x: int(np.array(x))
 
     def __len__(self):
