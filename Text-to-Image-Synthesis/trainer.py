@@ -438,7 +438,6 @@ class Trainer(object):
 
                 # Train the discriminator
                 self.discriminator.zero_grad()
-                self.discriminator2.zero_grad()
 
                 # ------------------- Training D stage 1 -------------------------------
                 outputs, activation_real = self.discriminator(right_images, right_embed)
@@ -470,6 +469,7 @@ class Trainer(object):
 
                 # -------------------- Training G stage 1 -------------------------------
                 self.generator.zero_grad()
+                self.discriminator.zero_grad()
                 if is_cuda:
                     noise = Variable(torch.randn(right_images.size(0), 100)).cuda()
                 else:
@@ -510,6 +510,7 @@ class Trainer(object):
                 self.optimG.step()
 
                 # -------------------- Training D stage 2 -------------------------------
+                self.discriminator2.zero_grad()
                 outputs = self.discriminator2(right_images128, right_embed)
                 real_loss = criterion(outputs, smoothed_real_labels)
                 real_score = outputs
@@ -528,6 +529,7 @@ class Trainer(object):
                 fake_images_v1 = self.generator(right_embed, noise)
                 fake_images_v1 = fake_images_v1.detach()
                 fake_images = self.generator2(fake_images_v1, right_embed)
+                fake_images = fake_images.detach()
                 outputs, _ = self.discriminator2(fake_images, right_embed)
                 fake_loss = criterion(outputs, fake_labels)
                 fake_score = outputs
@@ -543,6 +545,7 @@ class Trainer(object):
 
                 # -------------------- Training G stage 2 -------------------------------
                 self.generator2.zero_grad()
+                self.discriminator2.zero_grad()
                 if is_cuda:
                     noise = Variable(torch.randn(right_images.size(0), 100)).cuda()
                 else:
