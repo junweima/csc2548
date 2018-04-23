@@ -516,7 +516,7 @@ class Trainer(object):
                 real_score = outputs
 
                 if cls:
-                    outputs, _ = self.discriminator2(wrong_images128, right_embed)
+                    outputs = self.discriminator2(wrong_images128, right_embed)
                     wrong_loss = criterion(outputs, fake_labels)
                     wrong_score = outputs
 
@@ -530,7 +530,7 @@ class Trainer(object):
                 fake_images_v1 = fake_images_v1.detach()
                 fake_images = self.generator2(fake_images_v1, right_embed)
                 fake_images = fake_images.detach()
-                outputs, _ = self.discriminator2(fake_images, right_embed)
+                outputs = self.discriminator2(fake_images, right_embed)
                 fake_loss = criterion(outputs, fake_labels)
                 fake_score = outputs
 
@@ -555,7 +555,7 @@ class Trainer(object):
                 fake_images_v1 = self.generator(right_embed, noise)
                 fake_images_v1 = fake_images_v1.detach()
                 fake_images = self.generator2(fake_images_v1, right_embed)
-                outputs, _ = self.discriminator2(fake_images, right_embed)
+                outputs = self.discriminator2(fake_images, right_embed)
 
                 g_loss2 = criterion(outputs, real_labels)
                 g_loss2.backward()
