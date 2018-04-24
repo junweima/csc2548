@@ -70,9 +70,9 @@ class Trainer(object):
             self.generator2.apply(Utils.weights_init)
 
         if dataset == 'birds':
-            self.dataset = Text2ImageDataset(config['birds_dataset_path'], split=split)
+            self.dataset = Text2ImageDataset(config['birds_dataset_path'], dataset_type='birds', split=split)
         elif dataset == 'flowers':
-            self.dataset = Text2ImageDataset(config['flowers_dataset_path'], split=split)
+            self.dataset = Text2ImageDataset(config['flowers_dataset_path'], dataset_type='flowers', split=split)
         else:
             print('Dataset not supported, please select either birds or flowers.')
             exit()

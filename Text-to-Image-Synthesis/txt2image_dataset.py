@@ -14,8 +14,9 @@ import torchvision.transforms as transforms
 
 class Text2ImageDataset(Dataset):
 
-    def __init__(self, datasetFile, transform=None, split=0):
+    def __init__(self, datasetFile, dataset_type, transform=None, split=0):
         self.datasetFile = datasetFile
+        self.dataset_type = dataset_type
         self.transform = transform
         self.dataset = None
         self.dataset_keys = None
@@ -53,43 +54,44 @@ class Text2ImageDataset(Dataset):
         example_name = self.dataset_keys[idx]
         # example_name = self.dataset_keys[0]
         example = self.dataset[self.split][example_name]
-        index_found = self.image_paths_df.index[self.image_paths_df[2]==(example_name[:-2]+'.jpg')].values[0]
-        if index_found == None:
-            print('ERROR: cannot find image index')
 
-        # find right image bbox
-        df_bbox = self.bboxes_df.iloc[[index_found]]
-        bbox_x = df_bbox[1].values[0]
-        bbox_y = df_bbox[2].values[0]
-        bbox_w = df_bbox[3].values[0]
-        bbox_h = df_bbox[4].values[0]
-        
         right_image = bytes(np.array(example['img']))
         right_embed = np.array(example['embeddings'], dtype=float)
         wrong_name, wrong_example = self.find_wrong_image(example['class']) 
-        # wrong_image = bytes(np.array(self.find_wrong_image(example['class'])))
         wrong_image = bytes(np.array(wrong_example))
-        inter_embed = np.array(self.find_inter_embed())
 
-        # find wrong image bbox
-        index_found_wrong = self.image_paths_df.index[self.image_paths_df[2]==(wrong_name[:-2]+'.jpg')].values[0]
-        if index_found_wrong == None:
-            print('ERROR: cannot find wrong image')
+        if self.dataset_type == 'birds': 
+            index_found = self.image_paths_df.index[self.image_paths_df[2]==(example_name[:-2]+'.jpg')].values[0]
+            if index_found == None:
+                print('ERROR: cannot find image index')
 
-        df_bbox_wrong = self.bboxes_df.iloc[[index_found_wrong]]
-        wrong_bbox_x = df_bbox_wrong[1].values[0]
-        wrong_bbox_y = df_bbox_wrong[2].values[0]
-        wrong_bbox_w = df_bbox_wrong[3].values[0]
-        wrong_bbox_h = df_bbox_wrong[4].values[0]
+            # find right image bbox
+            df_bbox = self.bboxes_df.iloc[[index_found]]
+            bbox_x = df_bbox[1].values[0]
+            bbox_y = df_bbox[2].values[0]
+            bbox_w = df_bbox[3].values[0]
+            bbox_h = df_bbox[4].values[0]
+        
+            # find wrong image bbox
+            index_found_wrong = self.image_paths_df.index[self.image_paths_df[2]==(wrong_name[:-2]+'.jpg')].values[0]
+            if index_found_wrong == None:
+                print('ERROR: cannot find wrong image')
+
+            df_bbox_wrong = self.bboxes_df.iloc[[index_found_wrong]]
+            wrong_bbox_x = df_bbox_wrong[1].values[0]
+            wrong_bbox_y = df_bbox_wrong[2].values[0]
+            wrong_bbox_w = df_bbox_wrong[3].values[0]
+            wrong_bbox_h = df_bbox_wrong[4].values[0]
 
         byte_right_image = io.BytesIO(right_image)
         byte_wrong_image = io.BytesIO(wrong_image)
 
         right_image = Image.open(byte_right_image)
         wrong_image = Image.open(byte_wrong_image)
-        
-        right_image = self.crop_image(right_image, bbox=[bbox_x, bbox_y, bbox_w, bbox_h]) 
-        wrong_image = self.crop_image(wrong_image, bbox=[wrong_bbox_x, wrong_bbox_y, wrong_bbox_w, wrong_bbox_h]) 
+
+        if self.dataset_type == 'birds':
+            right_image = self.crop_image(right_image, bbox=[bbox_x, bbox_y, bbox_w, bbox_h]) 
+            wrong_image = self.crop_image(wrong_image, bbox=[wrong_bbox_x, wrong_bbox_y, wrong_bbox_w, wrong_bbox_h]) 
 
         # right_image = Image.open(byte_right_image).resize((64, 64))
         # wrong_image = Image.open(byte_wrong_image).resize((64, 64))
@@ -116,7 +118,6 @@ class Text2ImageDataset(Dataset):
                 'right_images': torch.FloatTensor(right_image),
                 'right_embed': torch.FloatTensor(right_embed),
                 'wrong_images': torch.FloatTensor(wrong_image),
-                'inter_embed': torch.FloatTensor(inter_embed),
                 'txt': str(txt),
                 'right_images128': torch.FloatTensor(right_image128),
                 'wrong_images128': torch.FloatTensor(wrong_image128)
